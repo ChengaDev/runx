@@ -13,6 +13,11 @@ linters:
     - bodyclose
     - noctx
     - unconvert
+  exclusions:
+    rules:
+      - path: _test\.go
+        linters:
+          - errcheck
 
 formatters:
   enable:
@@ -24,10 +29,3 @@ formatters:
     goimports:
       local-prefixes:
         - github.com/ChengaDev/runx
-
-issues:
-  exclusions:
-    rules:
-      - path: _test\.go
-        linters:
-          - errcheck
