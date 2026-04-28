@@ -2,6 +2,9 @@
 /runx
 *.exe
 
+# Claude Code local config
+.claude/
+
 # Build output
 /dist/
 
