@@ -3,27 +3,29 @@ version: "2"
 linters:
   default: none
   enable:
-    - errcheck        # unchecked errors
-    - govet           # suspicious constructs
-    - staticcheck     # static analysis
-    - ineffassign     # assignments with no effect
-    - unused          # unused code
-    - gofmt           # formatting
-    - goimports       # import ordering
-    - misspell        # typos
-    - gosimple        # simplification suggestions
-    - bodyclose       # HTTP response body not closed
-    - noctx           # HTTP requests without context
-    - unconvert       # unnecessary type conversions
+    - errcheck
+    - govet
+    - staticcheck
+    - ineffassign
+    - unused
+    - misspell
+    - gosimple
+    - bodyclose
+    - noctx
+    - unconvert
 
-linters-settings:
-  gofmt:
-    simplify: true
-  goimports:
-    local-prefixes: github.com/ChengaDev/runx
+formatters:
+  enable:
+    - gofmt
+    - goimports
+  settings:
+    gofmt:
+      simplify: true
+    goimports:
+      local-prefixes:
+        - github.com/ChengaDev/runx
 
 issues:
-  max-same-issues: 0
   exclude-rules:
     - path: _test\.go
       linters:
