@@ -25,8 +25,8 @@ formatters:
       local-prefixes:
         - github.com/ChengaDev/runx
 
-issues:
-  exclude-rules:
+exclusions:
+  rules:
     - path: _test\.go
       linters:
         - errcheck
