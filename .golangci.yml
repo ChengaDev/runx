@@ -9,7 +9,6 @@ linters:
     - ineffassign
     - unused
     - misspell
-    - gosimple
     - bodyclose
     - noctx
     - unconvert
