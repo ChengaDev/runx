@@ -21,4 +21,5 @@ func init() {
 	rootCmd.AddCommand(listCmd)
 	rootCmd.AddCommand(removeCmd)
 	rootCmd.AddCommand(editCmd)
+	rootCmd.AddCommand(hereCmd)
 }

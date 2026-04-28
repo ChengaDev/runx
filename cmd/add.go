@@ -3,6 +3,7 @@ package cmd
 import (
 	"fmt"
 	"os"
+	"path/filepath"
 
 	"github.com/charmbracelet/huh"
 	"github.com/spf13/cobra"
@@ -24,7 +25,6 @@ func init() {
 }
 
 func runAdd(cmd *cobra.Command, args []string) error {
-	// Launch wizard when no name argument is provided
 	if len(args) == 0 {
 		return runAddWizard()
 	}
@@ -37,30 +37,31 @@ func runAdd(cmd *cobra.Command, args []string) error {
 		return fmt.Errorf("required flag \"path\" not set")
 	}
 
-	if err := validateDir(path); err != nil {
+	absPath, err := resolveDir(path)
+	if err != nil {
 		return err
 	}
 
 	if command == "" {
-		detected, ok := detect.Command(path)
+		detected, ok := detect.Command(absPath)
 		if !ok {
 			return fmt.Errorf(
 				"could not auto-detect a run command for %q\n"+
 					"Please provide one explicitly with --cmd",
-				path,
+				absPath,
 			)
 		}
 		command = detected
 		fmt.Printf("Auto-detected command: %s\n", command)
 	}
 
-	return saveProject(name, path, command)
+	return saveProject(name, absPath, command)
 }
 
 func runAddWizard() error {
+	cwd, _ := os.Getwd()
 	var name, path, command string
 
-	// Step 1 & 2: name and path
 	if err := huh.NewForm(
 		huh.NewGroup(
 			huh.NewInput().
@@ -74,19 +75,18 @@ func runAddWizard() error {
 				}).
 				Value(&name),
 
-			huh.NewInput().
+			huh.NewFilePicker().
 				Title("Project path").
-				Placeholder("/path/to/project").
-				Validate(func(s string) error {
-					return validateDir(s)
-				}).
+				Description("Navigate with arrow keys, press Enter to select a directory.").
+				CurrentDirectory(cwd).
+				DirAllowed(true).
+				FileAllowed(false).
 				Value(&path),
 		),
 	).Run(); err != nil {
 		return err
 	}
 
-	// Step 3: command — pre-fill with auto-detected value if available
 	detected, _ := detect.Command(path)
 	command = detected
 
@@ -123,6 +123,15 @@ func saveProject(name, path, command string) error {
 
 	fmt.Printf("Project %q saved.\n  path: %s\n  cmd:  %s\n", name, path, command)
 	return nil
+}
+
+// resolveDir resolves a path (including ".") to an absolute path and validates it's a directory.
+func resolveDir(path string) (string, error) {
+	abs, err := filepath.Abs(path)
+	if err != nil {
+		return "", fmt.Errorf("invalid path %q: %w", path, err)
+	}
+	return abs, validateDir(abs)
 }
 
 func validateDir(path string) error {
