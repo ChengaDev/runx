@@ -8,8 +8,11 @@ Run any saved project from anywhere on your system — no `cd` required.
 # 1. Install
 go install github.com/ChengaDev/runx@latest
 
-# 2. Save a project (auto-detects the run command)
-runx add myapi --path ~/projects/myapi
+# 2. Save a project — interactive wizard
+runx add
+
+# Or if you're already inside the project directory
+runx here
 
 # 3. Run it from anywhere
 runx run myapi
@@ -48,15 +51,27 @@ Grab a pre-built binary from [Releases](https://github.com/ChengaDev/runx/releas
 
 ### Add a project
 
+Launch the interactive wizard — browse for the directory and confirm the auto-detected command:
+
 ```bash
-runx add myapi --path ~/projects/myapi --cmd "go run ."
+runx add
 ```
 
-Omit `--cmd` to auto-detect the run command:
+Or pass arguments directly (supports `.` and relative paths):
 
 ```bash
 runx add myapi --path ~/projects/myapi
-# Auto-detected command: go run .
+runx add myapi --path .
+runx add myapi --path ~/projects/myapi --cmd "go run ."
+```
+
+### Save the current directory
+
+From inside a project, register it in one step — name defaults to the directory name:
+
+```bash
+cd ~/projects/myapi
+runx here
 ```
 
 **Auto-detection rules:**

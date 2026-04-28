@@ -563,7 +563,14 @@
       </div>
       <div class="t-line">
         <span class="t-out t-blue">? Project path</span>
-        <span class="t-out">~/projects/my-api</span>
+        <span class="t-dim">(directory browser)</span>
+      </div>
+      <div class="t-line">
+        <span class="t-out t-dim">&nbsp;&nbsp;▸ ~/projects/</span>
+      </div>
+      <div class="t-line">
+        <span class="t-out t-ok">&nbsp;&nbsp;▸ ~/projects/my-api/</span>
+        <span class="t-dim">← selected</span>
       </div>
       <div class="t-line">
         <span class="t-out t-blue">? Run command</span>
@@ -602,7 +609,7 @@
       <div class="card">
         <div class="card-icon">🧙</div>
         <h3>Interactive Wizard</h3>
-        <p>Run <code style="font-family:monospace;font-size:0.8rem;color:#f97316">runx add</code> with no arguments to launch a guided step-by-step setup for any project.</p>
+        <p>Run <code style="font-family:monospace;font-size:0.8rem;color:#f97316">runx add</code> to launch a wizard with a built-in directory browser — no path copying needed.</p>
       </div>
       <div class="card">
         <div class="card-icon">⚡</div>
@@ -625,6 +632,11 @@
         <p>Forward flags to your underlying command with <code style="font-family:monospace;font-size:0.8rem;color:#f97316">--</code>. Works exactly as you'd expect.</p>
       </div>
       <div class="card">
+        <div class="card-icon">📂</div>
+        <h3>runx here</h3>
+        <p>Already inside your project? Run <code style="font-family:monospace;font-size:0.8rem;color:#f97316">runx here</code> — name defaults to the directory name, command is auto-detected.</p>
+      </div>
+      <div class="card">
         <div class="card-icon">🌍</div>
         <h3>Cross-Platform</h3>
         <p>Native binaries for macOS, Linux, and Windows on both amd64 and arm64 architectures.</p>
@@ -637,7 +649,7 @@
   <!-- How it works -->
   <section>
     <h2>How it works</h2>
-    <p class="section-sub">Four commands cover everything.</p>
+    <p class="section-sub">A handful of commands cover everything.</p>
 
     <div class="steps">
       <div class="step">
@@ -647,7 +659,7 @@
         </div>
         <div class="step-body">
           <h3>Register a project</h3>
-          <p>Run <code>runx add</code> to open the wizard, or pass <code>--path</code> directly. The run command is auto-detected from files like <code>go.mod</code> or <code>package.json</code>.</p>
+          <p>Run <code>runx add</code> for the wizard with a directory browser, <code>runx here</code> if you're already inside the project, or pass <code>--path</code> directly. The run command is auto-detected.</p>
         </div>
       </div>
 
