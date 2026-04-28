@@ -1,0 +1,10 @@
+# Binaries
+/runx
+*.exe
+
+# Build output
+/dist/
+
+# Go workspace
+go.work
+go.work.sum
