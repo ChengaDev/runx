@@ -1,0 +1,764 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="runx — save projects once, run them from anywhere. No more cd-ing around or remembering commands.">
+  <title>runx — save once, run from anywhere</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      background: #0d0d0d;
+      color: #e5e7eb;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif;
+      line-height: 1.6;
+      overflow-x: hidden;
+    }
+
+    /* ── Animations ──────────────────────────── */
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(20px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to   { opacity: 1; }
+    }
+    @keyframes pulse-dot {
+      0%, 100% { box-shadow: 0 0 0 0 rgba(249,115,22,0.5); }
+      50%       { box-shadow: 0 0 0 6px rgba(249,115,22,0); }
+    }
+    @keyframes glow {
+      0%, 100% { text-shadow: 0 0 20px rgba(249,115,22,0.3); }
+      50%       { text-shadow: 0 0 40px rgba(249,115,22,0.6); }
+    }
+    @keyframes cursor-blink {
+      0%, 100% { opacity: 1; }
+      50%       { opacity: 0; }
+    }
+
+    .animate-fade-up { animation: fadeUp 0.6s ease both; }
+    .animate-fade-in { animation: fadeIn 0.6s ease both; }
+    .delay-1 { animation-delay: 0.1s; }
+    .delay-2 { animation-delay: 0.2s; }
+    .delay-3 { animation-delay: 0.35s; }
+    .delay-4 { animation-delay: 0.5s; }
+
+    /* ── Nav ─────────────────────────────────── */
+    nav {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 1.25rem 2.5rem;
+      border-bottom: 1px solid #1a1a1a;
+      position: sticky;
+      top: 0;
+      background: rgba(13,13,13,0.92);
+      backdrop-filter: blur(12px);
+      z-index: 100;
+      animation: fadeIn 0.4s ease both;
+    }
+
+    .nav-logo {
+      display: flex;
+      align-items: center;
+      gap: 0.55rem;
+      font-weight: 700;
+      font-size: 1rem;
+      color: white;
+      text-decoration: none;
+      letter-spacing: -0.01em;
+      font-family: 'SF Mono', 'Fira Code', monospace;
+    }
+
+    .nav-dot {
+      width: 9px;
+      height: 9px;
+      background: #f97316;
+      border-radius: 50%;
+      animation: pulse-dot 2s ease-in-out infinite;
+      flex-shrink: 0;
+    }
+
+    .nav-links {
+      display: flex;
+      gap: 1.75rem;
+      list-style: none;
+    }
+
+    .nav-links a {
+      color: #9ca3af;
+      text-decoration: none;
+      font-size: 0.875rem;
+      transition: color 0.15s;
+    }
+    .nav-links a:hover { color: #fff; }
+
+    /* ── Hero ────────────────────────────────── */
+    .hero {
+      text-align: center;
+      padding: 6.5rem 1.5rem 5rem;
+      max-width: 720px;
+      margin: 0 auto;
+    }
+
+    .hero-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      background: rgba(249,115,22,0.08);
+      border: 1px solid rgba(249,115,22,0.2);
+      border-radius: 999px;
+      padding: 0.3rem 0.9rem;
+      font-size: 0.78rem;
+      color: #f97316;
+      font-weight: 500;
+      margin-bottom: 1.75rem;
+      letter-spacing: 0.02em;
+    }
+
+    .hero-badge .dot {
+      width: 6px;
+      height: 6px;
+      background: #f97316;
+      border-radius: 50%;
+      animation: pulse-dot 1.5s ease-in-out infinite;
+    }
+
+    .hero h1 {
+      font-size: clamp(2.4rem, 6vw, 3.8rem);
+      font-weight: 800;
+      color: #fff;
+      line-height: 1.1;
+      letter-spacing: -0.03em;
+      margin-bottom: 1.35rem;
+    }
+
+    .hero h1 .brand {
+      font-family: 'SF Mono', 'Fira Code', monospace;
+      background: linear-gradient(135deg, #fff 0%, #d1d5db 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .hero h1 .accent {
+      color: #f97316;
+      animation: glow 3s ease-in-out infinite;
+    }
+
+    .hero p {
+      color: #9ca3af;
+      font-size: 1.08rem;
+      max-width: 520px;
+      margin: 0 auto 2.5rem;
+      line-height: 1.7;
+    }
+
+    .hero-buttons {
+      display: flex;
+      gap: 0.75rem;
+      justify-content: center;
+      flex-wrap: wrap;
+      margin-bottom: 2.75rem;
+    }
+
+    .btn-primary {
+      background: #f97316;
+      color: #fff;
+      padding: 0.7rem 1.6rem;
+      border-radius: 8px;
+      font-size: 0.9rem;
+      font-weight: 600;
+      text-decoration: none;
+      transition: background 0.15s, transform 0.15s, box-shadow 0.15s;
+    }
+
+    .btn-primary:hover {
+      background: #ea6c00;
+      transform: translateY(-1px);
+      box-shadow: 0 4px 20px rgba(249,115,22,0.3);
+    }
+
+    .btn-secondary {
+      background: transparent;
+      color: #e5e7eb;
+      padding: 0.7rem 1.6rem;
+      border-radius: 8px;
+      font-size: 0.9rem;
+      font-weight: 500;
+      text-decoration: none;
+      border: 1px solid #2d2d2d;
+      transition: border-color 0.15s, color 0.15s, transform 0.15s;
+    }
+
+    .btn-secondary:hover {
+      border-color: #555;
+      color: #fff;
+      transform: translateY(-1px);
+    }
+
+    /* ── Terminal ────────────────────────────── */
+    .terminal {
+      background: #0a0a0a;
+      border: 1px solid #1e1e1e;
+      border-radius: 12px;
+      padding: 1.25rem 1.5rem;
+      text-align: left;
+      font-family: 'SF Mono', 'Fira Code', 'Cascadia Code', monospace;
+      font-size: 0.83rem;
+      max-width: 540px;
+      margin: 0 auto;
+      transition: border-color 0.2s;
+    }
+
+    .terminal:hover { border-color: #2a2a2a; }
+
+    .terminal-bar {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      margin-bottom: 1rem;
+    }
+
+    .terminal-dots { display: flex; gap: 0.4rem; }
+    .terminal-dots span { width: 10px; height: 10px; border-radius: 50%; }
+    .terminal-dots .red    { background: #ff5f56; }
+    .terminal-dots .yellow { background: #ffbd2e; }
+    .terminal-dots .green  { background: #27c93f; }
+    .terminal-title {
+      color: #4b5563;
+      font-size: 0.78rem;
+      margin-left: auto;
+    }
+
+    .t-line   { display: flex; gap: 0.6rem; line-height: 1.9; flex-wrap: wrap; }
+    .t-prompt { color: #10b981; user-select: none; flex-shrink: 0; }
+    .t-cmd    { color: #d1d5db; }
+    .t-blank  { height: 0.5rem; }
+    .t-out    { color: #6b7280; padding-left: 1.4rem; }
+    .t-ok     { color: #10b981; font-weight: 600; }
+    .t-blue   { color: #3b82f6; font-weight: 600; }
+    .t-dim    { color: #4b5563; }
+    .t-cursor { animation: cursor-blink 1s step-end infinite; color: #f97316; }
+
+    /* ── Section ─────────────────────────────── */
+    section {
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 5rem 1.5rem;
+    }
+
+    section h2 {
+      text-align: center;
+      font-size: 1.55rem;
+      font-weight: 700;
+      color: #fff;
+      margin-bottom: 0.6rem;
+      letter-spacing: -0.02em;
+    }
+
+    .section-sub {
+      text-align: center;
+      color: #6b7280;
+      font-size: 0.9rem;
+      margin-bottom: 2.75rem;
+    }
+
+    hr { border: none; border-top: 1px solid #1a1a1a; }
+
+    /* ── Feature cards ───────────────────────── */
+    .cards {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 1rem;
+    }
+
+    @media (max-width: 640px)  { .cards { grid-template-columns: 1fr; } }
+    @media (min-width: 641px) and (max-width: 860px) { .cards { grid-template-columns: repeat(2, 1fr); } }
+
+    .card {
+      background: #0f0f0f;
+      border: 1px solid #1e1e1e;
+      border-radius: 12px;
+      padding: 1.4rem 1.3rem;
+      transition: border-color 0.2s, transform 0.2s, box-shadow 0.2s;
+      opacity: 0;
+      transform: translateY(16px);
+    }
+
+    .card.visible {
+      opacity: 1;
+      transform: translateY(0);
+      transition: opacity 0.5s ease, transform 0.5s ease, border-color 0.2s, box-shadow 0.2s;
+    }
+
+    .card:hover {
+      border-color: #2a2a2a;
+      transform: translateY(-3px);
+      box-shadow: 0 8px 30px rgba(0,0,0,0.4);
+    }
+
+    .card-icon { font-size: 1.15rem; margin-bottom: 0.65rem; }
+
+    .card h3 {
+      font-size: 0.95rem;
+      font-weight: 600;
+      color: #f3f4f6;
+      margin-bottom: 0.4rem;
+    }
+
+    .card p {
+      font-size: 0.83rem;
+      color: #6b7280;
+      line-height: 1.6;
+    }
+
+    /* ── How it works ────────────────────────── */
+    .steps {
+      display: flex;
+      flex-direction: column;
+      gap: 0;
+      max-width: 600px;
+      margin: 0 auto;
+    }
+
+    .step {
+      display: flex;
+      gap: 1.25rem;
+      opacity: 0;
+      transform: translateY(12px);
+    }
+
+    .step.visible {
+      opacity: 1;
+      transform: translateY(0);
+      transition: opacity 0.5s ease, transform 0.5s ease;
+    }
+
+    .step-left {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      flex-shrink: 0;
+    }
+
+    .step-num {
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      background: rgba(249,115,22,0.1);
+      border: 1px solid rgba(249,115,22,0.3);
+      color: #f97316;
+      font-size: 0.78rem;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      font-family: 'SF Mono', 'Fira Code', monospace;
+    }
+
+    .step-line {
+      width: 1px;
+      flex: 1;
+      background: #1e1e1e;
+      margin: 0.35rem 0;
+      min-height: 1.5rem;
+    }
+
+    .step:last-child .step-line { display: none; }
+
+    .step-body {
+      padding-bottom: 2rem;
+      padding-top: 0.35rem;
+    }
+
+    .step-body h3 {
+      font-size: 0.95rem;
+      font-weight: 600;
+      color: #f3f4f6;
+      margin-bottom: 0.25rem;
+    }
+
+    .step-body p {
+      font-size: 0.85rem;
+      color: #6b7280;
+      line-height: 1.6;
+    }
+
+    .step-body code {
+      font-family: 'SF Mono', 'Fira Code', monospace;
+      font-size: 0.8rem;
+      color: #f97316;
+      background: rgba(249,115,22,0.08);
+      border: 1px solid rgba(249,115,22,0.15);
+      padding: 0.1rem 0.45rem;
+      border-radius: 4px;
+    }
+
+    /* ── Install ─────────────────────────────── */
+    .install-box {
+      background: #0a0a0a;
+      border: 1px solid #1e1e1e;
+      border-radius: 12px;
+      padding: 1.5rem 1.75rem;
+      max-width: 520px;
+      margin: 0 auto 1.5rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1rem;
+      font-family: 'SF Mono', 'Fira Code', monospace;
+      font-size: 0.88rem;
+      color: #d1d5db;
+      transition: border-color 0.2s;
+    }
+
+    .install-box:hover { border-color: #2a2a2a; }
+
+    .install-label {
+      font-size: 0.7rem;
+      color: #4b5563;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      margin-bottom: 0.3rem;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    }
+
+    .copy-btn {
+      background: rgba(249,115,22,0.1);
+      border: 1px solid rgba(249,115,22,0.2);
+      color: #f97316;
+      padding: 0.4rem 0.85rem;
+      border-radius: 6px;
+      font-size: 0.78rem;
+      cursor: pointer;
+      white-space: nowrap;
+      transition: background 0.15s, color 0.15s;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    }
+
+    .copy-btn:hover { background: rgba(249,115,22,0.18); color: #fb923c; }
+
+    .install-alts {
+      text-align: center;
+      font-size: 0.82rem;
+      color: #4b5563;
+    }
+
+    .install-alts a {
+      color: #6b7280;
+      text-decoration: none;
+      transition: color 0.15s;
+    }
+
+    .install-alts a:hover { color: #9ca3af; }
+
+    /* ── Built with ──────────────────────────── */
+    .pills {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+      justify-content: center;
+    }
+
+    .pill {
+      background: #0f0f0f;
+      border: 1px solid #1e1e1e;
+      border-radius: 999px;
+      padding: 0.3rem 0.85rem;
+      font-size: 0.78rem;
+      color: #9ca3af;
+      transition: border-color 0.15s, color 0.15s;
+    }
+
+    .pill:hover { border-color: #2a2a2a; color: #d1d5db; }
+
+    /* ── Footer ──────────────────────────────── */
+    footer {
+      border-top: 1px solid #1a1a1a;
+      padding: 2.5rem 1.5rem;
+      text-align: center;
+      font-size: 0.82rem;
+      color: #4b5563;
+    }
+
+    footer a {
+      color: #6b7280;
+      text-decoration: none;
+      transition: color 0.15s;
+    }
+
+    footer a:hover { color: #9ca3af; }
+
+    .footer-links {
+      display: flex;
+      gap: 1.5rem;
+      justify-content: center;
+      margin-bottom: 0.75rem;
+    }
+
+    @media (max-width: 640px) {
+      nav { padding: 1rem 1.25rem; }
+      .nav-links { gap: 1rem; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Nav -->
+  <nav>
+    <a href="#" class="nav-logo">
+      <span class="nav-dot"></span>
+      runx
+    </a>
+    <ul class="nav-links">
+      <li><a href="https://github.com/ChengaDev/runx">GitHub</a></li>
+      <li><a href="https://github.com/ChengaDev/runx/releases">Releases</a></li>
+      <li><a href="https://github.com/ChengaDev/runx#usage">Docs</a></li>
+    </ul>
+  </nav>
+
+  <!-- Hero -->
+  <div class="hero">
+    <div class="hero-badge animate-fade-up">
+      <span class="dot"></span>
+      Open Source &mdash; MIT License
+    </div>
+
+    <h1 class="animate-fade-up delay-1">
+      <span class="brand">runx</span><br>
+      save once,<br>run from <span class="accent">anywhere</span>
+    </h1>
+
+    <p class="animate-fade-up delay-2">
+      Stop navigating to project directories and remembering start commands.
+      Register a project once and launch it instantly from anywhere on your system.
+    </p>
+
+    <div class="hero-buttons animate-fade-up delay-3">
+      <a href="https://github.com/ChengaDev/runx/releases" class="btn-primary">Download</a>
+      <a href="https://github.com/ChengaDev/runx" class="btn-secondary">View Source</a>
+    </div>
+
+    <div class="terminal animate-fade-up delay-4">
+      <div class="terminal-bar">
+        <div class="terminal-dots">
+          <span class="red"></span>
+          <span class="yellow"></span>
+          <span class="green"></span>
+        </div>
+        <span class="terminal-title">~ anywhere on your machine</span>
+      </div>
+
+      <div class="t-line">
+        <span class="t-prompt">$</span>
+        <span class="t-cmd">runx add</span>
+      </div>
+      <div class="t-line">
+        <span class="t-out t-blue">? Project name</span>
+        <span class="t-out">my-api</span>
+      </div>
+      <div class="t-line">
+        <span class="t-out t-blue">? Project path</span>
+        <span class="t-out">~/projects/my-api</span>
+      </div>
+      <div class="t-line">
+        <span class="t-out t-blue">? Run command</span>
+        <span class="t-out">go run .</span>
+        <span class="t-dim">(auto-detected)</span>
+      </div>
+      <div class="t-line">
+        <span class="t-out t-ok">✓ Project "my-api" saved.</span>
+      </div>
+
+      <div class="t-blank"></div>
+
+      <div class="t-line">
+        <span class="t-prompt">$</span>
+        <span class="t-cmd">runx run my-api</span>
+      </div>
+      <div class="t-line">
+        <span class="t-out t-ok">▶ go run . </span>
+        <span class="t-dim">~/projects/my-api</span>
+      </div>
+      <div class="t-line">
+        <span class="t-out">Server running on :8080</span>
+        <span class="t-cursor">█</span>
+      </div>
+    </div>
+  </div>
+
+  <hr>
+
+  <!-- Features -->
+  <section>
+    <h2>Everything you need, nothing you don't</h2>
+    <p class="section-sub">A focused tool that does one thing well.</p>
+
+    <div class="cards">
+      <div class="card">
+        <div class="card-icon">🧙</div>
+        <h3>Interactive Wizard</h3>
+        <p>Run <code style="font-family:monospace;font-size:0.8rem;color:#f97316">runx add</code> with no arguments to launch a guided step-by-step setup for any project.</p>
+      </div>
+      <div class="card">
+        <div class="card-icon">⚡</div>
+        <h3>Auto-Detection</h3>
+        <p>Automatically detects run commands for Go, Node, Python, Rust and more — no manual config needed.</p>
+      </div>
+      <div class="card">
+        <div class="card-icon">📍</div>
+        <h3>Run from Anywhere</h3>
+        <p>Projects are registered globally. Run any project from any directory — no <code style="font-family:monospace;font-size:0.8rem;color:#f97316">cd</code> required.</p>
+      </div>
+      <div class="card">
+        <div class="card-icon">🔧</div>
+        <h3>Easy to Edit</h3>
+        <p>Update a project's path or command anytime with <code style="font-family:monospace;font-size:0.8rem;color:#f97316">runx edit</code>. Re-detection happens automatically.</p>
+      </div>
+      <div class="card">
+        <div class="card-icon">🎯</div>
+        <h3>Pass Extra Args</h3>
+        <p>Forward flags to your underlying command with <code style="font-family:monospace;font-size:0.8rem;color:#f97316">--</code>. Works exactly as you'd expect.</p>
+      </div>
+      <div class="card">
+        <div class="card-icon">🌍</div>
+        <h3>Cross-Platform</h3>
+        <p>Native binaries for macOS, Linux, and Windows on both amd64 and arm64 architectures.</p>
+      </div>
+    </div>
+  </section>
+
+  <hr>
+
+  <!-- How it works -->
+  <section>
+    <h2>How it works</h2>
+    <p class="section-sub">Four commands cover everything.</p>
+
+    <div class="steps">
+      <div class="step">
+        <div class="step-left">
+          <div class="step-num">1</div>
+          <div class="step-line"></div>
+        </div>
+        <div class="step-body">
+          <h3>Register a project</h3>
+          <p>Run <code>runx add</code> to open the wizard, or pass <code>--path</code> directly. The run command is auto-detected from files like <code>go.mod</code> or <code>package.json</code>.</p>
+        </div>
+      </div>
+
+      <div class="step">
+        <div class="step-left">
+          <div class="step-num">2</div>
+          <div class="step-line"></div>
+        </div>
+        <div class="step-body">
+          <h3>Saved to <code>~/.runx/projects.json</code></h3>
+          <p>Projects are stored locally in a simple JSON file. Override the location with <code>RUNX_CONFIG_DIR</code> if you need to.</p>
+        </div>
+      </div>
+
+      <div class="step">
+        <div class="step-left">
+          <div class="step-num">3</div>
+          <div class="step-line"></div>
+        </div>
+        <div class="step-body">
+          <h3>Run from anywhere</h3>
+          <p>Use <code>runx run &lt;name&gt;</code> from any directory. runx changes into the project path and executes the saved command.</p>
+        </div>
+      </div>
+
+      <div class="step">
+        <div class="step-left">
+          <div class="step-num">4</div>
+          <div class="step-line"></div>
+        </div>
+        <div class="step-body">
+          <h3>Manage with ease</h3>
+          <p>Use <code>runx list</code> to see all projects, <code>runx edit</code> to update them, and <code>runx remove</code> to clean up.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <hr>
+
+  <!-- Install -->
+  <section>
+    <h2>Get started in seconds</h2>
+    <p class="section-sub">Available via Homebrew, Go, or direct download.</p>
+
+    <div class="install-box">
+      <div>
+        <div class="install-label">Homebrew</div>
+        <span id="brew-cmd">brew install ChengaDev/tap/runx</span>
+      </div>
+      <button class="copy-btn" onclick="copyCmd('brew-cmd', this)">Copy</button>
+    </div>
+
+    <p class="install-alts">
+      Also available via&nbsp;
+      <a href="https://github.com/ChengaDev/runx#install">go install</a>
+      &nbsp;or&nbsp;
+      <a href="https://github.com/ChengaDev/runx/releases">pre-built binary</a>
+    </p>
+  </section>
+
+  <hr>
+
+  <!-- Built with -->
+  <section style="padding-top: 4rem; padding-bottom: 4rem;">
+    <h2>Built with</h2>
+    <p class="section-sub" style="margin-bottom: 1.75rem;">Minimal dependencies, maximum reliability.</p>
+    <div class="pills">
+      <span class="pill">Go</span>
+      <span class="pill">cobra</span>
+      <span class="pill">Bubble Tea / huh</span>
+      <span class="pill">macOS</span>
+      <span class="pill">Linux</span>
+      <span class="pill">Windows</span>
+      <span class="pill">amd64</span>
+      <span class="pill">arm64</span>
+      <span class="pill">MIT License</span>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer>
+    <div class="footer-links">
+      <a href="https://github.com/ChengaDev">@ChengaDev</a>
+      <a href="https://github.com/ChengaDev/runx">GitHub</a>
+      <a href="https://github.com/ChengaDev/runx/releases">Releases</a>
+      <a href="https://github.com/ChengaDev/runx/blob/main/LICENSE">MIT License</a>
+    </div>
+    runx &mdash; save once, run from anywhere.
+  </footer>
+
+  <script>
+    function copyCmd(id, btn) {
+      const text = document.getElementById(id).textContent;
+      navigator.clipboard.writeText(text).then(() => {
+        btn.textContent = 'Copied!';
+        setTimeout(() => btn.textContent = 'Copy', 1800);
+      });
+    }
+
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach((entry, i) => {
+        if (entry.isIntersecting) {
+          setTimeout(() => entry.target.classList.add('visible'), i * 80);
+          observer.unobserve(entry.target);
+        }
+      });
+    }, { threshold: 0.1 });
+
+    document.querySelectorAll('.card, .step').forEach(el => observer.observe(el));
+  </script>
+
+</body>
+</html>
