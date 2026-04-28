@@ -3,9 +3,10 @@ package cmd
 import (
 	"fmt"
 
+	"github.com/spf13/cobra"
+
 	"github.com/ChengaDev/runx/internal/detect"
 	"github.com/ChengaDev/runx/internal/store"
-	"github.com/spf13/cobra"
 )
 
 var editCmd = &cobra.Command{

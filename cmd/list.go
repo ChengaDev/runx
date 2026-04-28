@@ -3,8 +3,9 @@ package cmd
 import (
 	"fmt"
 
-	"github.com/ChengaDev/runx/internal/store"
 	"github.com/spf13/cobra"
+
+	"github.com/ChengaDev/runx/internal/store"
 )
 
 var listCmd = &cobra.Command{

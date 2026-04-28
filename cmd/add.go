@@ -4,10 +4,11 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/ChengaDev/runx/internal/detect"
-	"github.com/ChengaDev/runx/internal/store"
 	"github.com/charmbracelet/huh"
 	"github.com/spf13/cobra"
+
+	"github.com/ChengaDev/runx/internal/detect"
+	"github.com/ChengaDev/runx/internal/store"
 )
 
 var addCmd = &cobra.Command{

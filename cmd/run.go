@@ -52,9 +52,9 @@ func runRun(cmd *cobra.Command, args []string) error {
 
 	var c *exec.Cmd
 	if runtime.GOOS == "windows" {
-		c = exec.Command("cmd", "/c", cmdStr)
+		c = exec.CommandContext(cmd.Context(), "cmd", "/c", cmdStr)
 	} else {
-		c = exec.Command("sh", "-c", cmdStr)
+		c = exec.CommandContext(cmd.Context(), "sh", "-c", cmdStr)
 	}
 
 	c.Dir = p.Path
